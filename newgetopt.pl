@@ -1,8 +1,14 @@
 # newgetopt.pl -- new options parsing.
 # Now just a wrapper around the Getopt::Long module.
-# $Id: newgetopt.pl,v 1.17 1996-10-02 11:17:16+02 jv Exp $
+# $Id: newgetopt.pl,v 1.18 1998-09-26 17:36:50+02 jv Exp jv $
 
 {   package newgetopt;
+
+    if ( $^W ) {
+	warn ("WARNING: Subroutine NGetOpt (library file newgetopt.pl) ".
+	      "is obsoleted.\n".
+	      "         Use GetOptions (module Getopt::Long) instead.\n");
+    }
 
     # Values for $order. See GNU getopt.c for details.
     $REQUIRE_ORDER = 0;
@@ -15,22 +21,19 @@
 	$getopt_compat = 0;	# disallow '+' to start options
 	$option_start = "(--|-)";
 	$order = $REQUIRE_ORDER;
-	$bundling = 0;
-	$passthrough = 0;
     }
     else {
 	$autoabbrev = 1;	# automatic abbrev of options
 	$getopt_compat = 1;	# allow '+' to start options
 	$option_start = "(--|-|\\+)";
 	$order = $PERMUTE;
-	$bundling = 0;
-	$passthrough = 0;
     }
 
     # Other configurable settings.
+    $bundling = 0;
+    $passthrough = 0;
     $debug = 0;			# for debugging
     $ignorecase = 1;		# ignore case when matching options
-    $argv_end = "--";		# don't change this!
 }
 
 use Getopt::Long;
@@ -45,8 +48,10 @@ sub NGetOpt {
 	if defined $newgetopt::autoabbrev;
     $Getopt::Long::getopt_compat = $newgetopt::getopt_compat 
 	if defined $newgetopt::getopt_compat;
-    $Getopt::Long::option_start = $newgetopt::option_start 
+    $Getopt::Long::_genprefix = $newgetopt::option_start 
 	if defined $newgetopt::option_start;
+    $Getopt::Long::_terminator = $newgetopt::terminator
+	if defined $newgetopt::terminator;
     $Getopt::Long::order = $newgetopt::order 
 	if defined $newgetopt::order;
     $Getopt::Long::bundling = $newgetopt::bundling 

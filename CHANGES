@@ -1,3 +1,35 @@
+Changes
+-------
+
+* An option with optional string arg will only consume a lone - is it
+  is not defined as an option.
+
+* Bugfix: if there is one option, and you use -, it will no longer
+  indicate that option.
+
+  E.g. @ARGV = (- 1) and GetOptions ("f=i")
+
+* Unbundling works if option prefix is not "-".
+
+* You can use 'the 1 char prefix' and 'the more than 1 char prefix'
+  instead of - and -- w.r.t. bundling and --opt=val.
+
+* Configure: terminator (default '--'). 
+
+* Removed non-functional option type 'e'.
+
+* Add option type 'b' (boolean).
+
+* Add value lists, ranges and repetitions.
+
+* Configure: use_prefix
+
+* Configure: no_prefix
+
+* newgetopt.pl: add 'obsoleted' warning.
+
+Known bugs:
+
 Changes in version 2.17
 -----------------------
 
