@@ -37,7 +37,7 @@ name completion. As a rule of thumb, you can use abbreviations freely
 while running commands interactively but always use the full names in
 scripts. 
 
-Examples (POSIX compliant):
+Examples (POSIX):
 
     --long --width=80 --height=24
 
@@ -66,20 +66,9 @@ By default, single-letter option names are case sensitive.
   - options can have alternative names, using an alternative name
     will behave as if the primary name was used;
   - options can be negatable, e.g. "debug" will switch it on, while
-    "nodebug" will switch it off;
+    "nodebug" will switch it off.    
   - options can set values, but also add values producing an array
-    of values instead of a single scalar value, or set values in a hash;
-  - options can have value lists and ranges of valid values
-    associated;
-  - options can take multiple arguments, e.g. a coordinate would
-    require three numbers.
-
-* Option types
-
-  - flags, that get set when the option occurs, e.g. "-debug";
-  - numeric, the specified value will be assigned, e.g. "-width 80";
-  - string, an arbitrary value, e.g. "-title Hello";
-  - boolean, something considered true e.g. "yes", or false e.g. "off".
+    of values instead of a single scalar value, or set values in a hash.
 
 * Options linkage
 
@@ -98,18 +87,80 @@ command line options and how they must be handled:
 
 The module contains a special method, Getopt::Long::Configure, to
 control configuration variables to activate (or de-activate) specific
-behaviour. It can be called with one or more names of configuration
-items like "debug", "auto_abbrev", "bundling" and "ignore_case".
+behavior. It can be called with one or more names of options:
 
-* Object orientation:
+  - default
 
-Instead of just calling GetOptions, you can also use it in an
-object-oriented way:
+	Restore default settings.
 
-   my $parser = new Getopt::Long;
-   $parser->configure (...);   # set configuration
-   $parser->define (...);      # define options
-   $parser->parse;             # parse @ARGV
+  - auto_abbrev      
+
+	Allow option names to be abbreviated to uniqueness. 
+
+  - getopt_compat   
+
+	Allow '+' to start options.
+
+  - permute
+  - require_order           
+
+	Whether non-options are allowed to be mixed with options.
+
+	permute means that 
+
+	    -foo arg1 -bar arg2 arg3
+
+	is equivalent to
+
+	    -foo -bar arg1 arg2 arg3
+
+	(provided -foo does not take an argument value).
+
+	require_order means that options processing
+	terminates when the first non-option is encountered.
+
+	    -foo arg1 -bar arg2 arg3
+
+	is equivalent to
+
+	    -foo -- arg1 -bar arg2 arg3
+
+  - bundling
+
+	Setting this variable to a non-zero value will allow 
+	single-character options to be bundled. To distinguish bundles
+	from long option names, long options must be introduced with 
+	"--" and single-character options (and bundles) with "-".
+
+  - ignore_case      
+
+	Ignore case when matching options.
+
+  - pass_through
+
+	Do not issue error messages for unknown options, but leave
+	them (pass-through) in @ARGV.
+
+  - prefix
+
+	The string that starts options. See also prefix_pattern.
+
+  - prefix_pattern
+
+	A Perl pattern that identifies the strings that introduce
+	options. Default is (--|-|\+) unless environment variable
+	POSIXLY_CORRECT has been set, in which case it is (--|-).
+
+* Usable variables
+
+  - $Getopt::Long::error
+
+	Internal error flag. May be incremented from a call-back
+	routine to cause options parsing to fail.
+
+  - $Getopt::Long::debug           
+
+	Enable copious debugging output. Default is 0.
 
 AVAILABILITY
 ============
@@ -122,7 +173,7 @@ Network (CPAN), see "http://www.perl.com/CPAN/authors/Johan_Vromans".
 COPYRIGHT AND DISCLAIMER
 ========================
 
-Module Getopt::Long is Copyright 1990,1998 by Johan Vromans.
+Module Getopt::Long is Copyright 1990,1999 by Johan Vromans.
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
