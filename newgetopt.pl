@@ -1,6 +1,6 @@
 # newgetopt.pl -- new options parsing.
 # Now just a wrapper around the Getopt::Long module.
-# $Id: newgetopt.pl,v 1.17b3 1996-03-16 12:46:08+01 jv Exp jv $
+# $Id: newgetopt.pl,v 1.17 1996-10-02 11:17:16+02 jv Exp $
 
 {   package newgetopt;
 

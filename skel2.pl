@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl -w
-my $RCS_Id = '$Id: skel2.pl,v 1.1 1996-09-16 20:28:09+02 jv Exp jv $ ';
+my $RCS_Id = '$Id: skel2.pl,v 1.2 1996-10-02 11:20:36+02 jv Exp $ ';
 
 # Author          : Johan Vromans
 # Created On      : Sun Sep 15 18:39:01 1996
@@ -67,7 +67,7 @@ use strict;
 
 my $my_package = 'Sciurix';
 my ($my_name, $my_version) = $RCS_Id =~ /: (.+).pl,v ([\d.]+)/;
-$my_version .= '*' if length('$Locker: jv $ ') > 12;
+$my_version .= '*' if length('$Locker:  $ ') > 12;
 
 ################ Program parameters ################
 

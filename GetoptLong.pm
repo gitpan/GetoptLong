@@ -1,11 +1,11 @@
 # GetOpt::Long.pm -- POSIX compatible options parsing
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.3 1996-04-05 21:03:05+02 jv Exp jv $
+# RCS Status      : $Id: GetoptLong.pm,v 2.4 1996-10-02 11:16:26+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Sep 16 20:39:10 1996
-# Update Count    : 499
+# Last Modified On: Wed Oct  2 11:13:12 1996
+# Update Count    : 500
 # Status          : Released
 
 package Getopt::Long;
@@ -14,7 +14,7 @@ require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-$VERSION = sprintf("%d.%02d", '$Revision: 2.4b3 $ ' =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", '$Revision: 2.4 $ ' =~ /(\d+)\.(\d+)/);
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
 	    $passthrough $error $debug 
 	    $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER
@@ -530,7 +530,7 @@ sub GetOptions {
 				# than once in differing environments
     $error = 0;
 
-    print STDERR ('GetOptions $Revision: 2.4b3 $ ',
+    print STDERR ('GetOptions $Revision: 2.4 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",
