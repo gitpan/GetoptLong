@@ -1,6 +1,6 @@
 #!./perl -w
 
-use Getopt::Long;
+use Getopt::Long 2.17;
 
 print "1..9\n";
 
