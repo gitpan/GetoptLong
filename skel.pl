@@ -1,11 +1,11 @@
 #!/usr/local/bin/perl -w
-my $RCS_Id = '$Id: skel.pl,v 1.3 1997-01-10 16:49:56+01 jv Exp $ ';
+my $RCS_Id = '$Id: skel.pl,v 1.4 1997-09-17 12:55:05+02 jv Exp $ ';
 
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Jan 10 16:49:53 1997
-# Update Count    : 26
+# Last Modified On: Wed Sep 17 12:54:54 1997
+# Update Count    : 29
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -41,7 +41,7 @@ exit 0;
 
 ################ Subroutines ################
 
-sub app_ident();
+sub app_ident;
 sub app_usage($);
 
 sub app_options {
@@ -53,25 +53,25 @@ sub app_options {
     return unless @ARGV > 0;
     
     if ( !GetOptions(
-		     ident	=> \$ident,
-		     verbose	=> \$verbose,
-		     trace	=> \$trace,
-		     help	=> \$help,
-		     debug	=> \$debug,
+		     'ident'	=> \$ident,
+		     'verbose'	=> \$verbose,
+		     'trace'	=> \$trace,
+		     'help'	=> \$help,
+		     'debug'	=> \$debug,
 		    ) or $help )
     {
 	app_usage(2);
     }
-    app_ident() if $ident;
+    app_ident if $ident;
 }
 
 sub app_ident {
     print STDERR ("This is $my_package [$my_name $my_version]\n");
 }
 
-sub app_usage {
+sub app_usage($) {
     my ($exit) = @_;
-    app_ident();
+    app_ident;
     print STDERR <<EndOfUsage;
 Usage: $0 [options] [file ...]
     -help		this message
