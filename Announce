@@ -14,6 +14,7 @@ The kit contains:
   newgetopt.pl   -- version 1.17 of newgetopt.pl (subroutine NGetOpt)
   Makefile.PL    -- Makefile for installation
   skel.pl        -- Skeleton program to use Getopt::Long
+  skel2.pl       -- Skeleton program to use Getopt::Long with Pod::Usage
 
 The README document is attached to this message.
 
@@ -34,6 +35,11 @@ New features in this version
     --define foo=bar
 
   and have $opt_define{"foo"} set to "bar".
+
+* An enhanced skeleton program, skel2.pl, that combines the power of
+  Getopt::Long with Pod::Usage. 
+  Module Pod::Usage can be obtained from CPAN,
+  http://www.perl.com/CPAN/authors/Brad_Appleton. 
 
 Possible incompatibility
 ------------------------

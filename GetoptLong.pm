@@ -4,8 +4,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Aug 10 21:37:59 1996
-# Update Count    : 497
+# Last Modified On: Mon Sep 16 20:39:10 1996
+# Update Count    : 499
 # Status          : Released
 
 package Getopt::Long;
@@ -14,7 +14,7 @@ require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-$VERSION = sprintf("%d.%02d", '$Revision: 2.4b2 $ ' =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", '$Revision: 2.4b3 $ ' =~ /(\d+)\.(\d+)/);
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
 	    $passthrough $error $debug 
 	    $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER
@@ -274,7 +274,7 @@ setting the element of the hash %opt_name with key "name" to "value"
 linkage is supplied, this must be a reference to a HASH.
 
 If configuration variable $Getopt::Long::getopt_compat is set to a
-non-zero value, options that start with "+" may also include their
+non-zero value, options that start with "+" or "-" may also include their
 arguments, e.g. "+foo=bar". This is for compatiblity with older
 implementations of the GNU "getopt" routine.
 
@@ -530,7 +530,7 @@ sub GetOptions {
 				# than once in differing environments
     $error = 0;
 
-    print STDERR ('GetOptions $Revision: 2.4b2 $ ',
+    print STDERR ('GetOptions $Revision: 2.4b3 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",
@@ -863,8 +863,7 @@ sub find_option {
     my $rest = undef;	# remainder from unbundling
 
     # If it is a long option, it may include the value.
-    if (($starter eq "--" 
-	 || ($getopt_compat && $starter eq "+"))
+    if (($starter eq "--" || $getopt_compat)
 	&& $opt =~ /^([^=]+)=/ ) {
 	$opt = $1;
 	$optarg = $';
