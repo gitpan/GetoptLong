@@ -2,17 +2,17 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.15 1998-03-09 18:40:41+01 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.16 1998-03-13 11:05:29+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Mar  9 18:38:09 1998
-# Update Count    : 658
+# Last Modified On: Fri Mar 13 11:05:28 1998
+# Update Count    : 659
 # Status          : Released
 
 ################ Copyright ################
 
-# This program is Copyright 1990,1997 by Johan Vromans.
+# This program is Copyright 1990,1998 by Johan Vromans.
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
@@ -35,7 +35,7 @@ BEGIN {
     require 5.004;
     use Exporter ();
     use vars   qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION   = sprintf("%d.%02d", q$Revision: 2.15 $ =~ /(\d+)\.(\d+)/);
+    $VERSION   = sprintf("%d.%02d", q$Revision: 2.16 $ =~ /(\d+)\.(\d+)/);
 
     @ISA       = qw(Exporter);
     @EXPORT    = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
@@ -87,7 +87,7 @@ sub GetOptions {
     $genprefix = $gen_prefix;	# so we can call the same module many times
     $error = '';
 
-    print STDERR ('GetOptions $Revision: 2.15 $ ',
+    print STDERR ('GetOptions $Revision: 2.16 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",
@@ -1287,7 +1287,7 @@ Johan Vromans E<lt>jvromans@squirrel.nlE<gt>
 
 =head1 COPYRIGHT AND DISCLAIMER
 
-This program is Copyright 1990,1997 by Johan Vromans.
+This program is Copyright 1990,1998 by Johan Vromans.
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
