@@ -4,8 +4,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Aug  4 16:50:13 1996
-# Update Count    : 493
+# Last Modified On: Sat Aug 10 21:37:59 1996
+# Update Count    : 497
 # Status          : Released
 
 package Getopt::Long;
@@ -14,7 +14,7 @@ require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-$VERSION = sprintf("%d.%02d", '$Revision: 2.4b1 $ ' =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", '$Revision: 2.4b2 $ ' =~ /(\d+)\.(\d+)/);
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
 	    $passthrough $error $debug 
 	    $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER
@@ -530,7 +530,7 @@ sub GetOptions {
 				# than once in differing environments
     $error = 0;
 
-    print STDERR ('GetOptions $Revision: 2.4b1 $ ',
+    print STDERR ('GetOptions $Revision: 2.4b2 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",
@@ -598,11 +598,11 @@ sub GetOptions {
 	    $opctl{$o = ''} = $c;
 	}
 	else {
-	    # Force an alias if the option name is not locase.
-	    $a = $o unless $o eq lc($o);
 	    # Handle alias names
 	    my @o =  split (/\|/, $o);
 	    my $linko = $o = $o[0];
+	    # Force an alias if the option name is not locase.
+	    $a = $o unless $o eq lc($o);
 	    $o = lc ($o)
 		if $ignorecase > 1 
 		    || ($ignorecase
@@ -916,11 +916,13 @@ sub find_option {
 		undef $opt;
 		return 1;
 	    }
+	    @hits = keys(%hit);
 	}
 
 	# Complete the option name, if appropriate.
 	if ( @hits == 1 && $hits[0] ne $opt ) {
 	    $tryopt = $hits[0];
+	    $tryopt = lc ($tryopt) if $ignorecase;
 	    print STDERR ("=> option \"$opt\" -> \"$tryopt\"\n")
 		if $debug;
 	}
