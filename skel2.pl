@@ -1,11 +1,11 @@
 #!/usr/local/bin/perl -w
-my $RCS_Id = '$Id: skel2.pl,v 1.4 1997-10-01 13:38:28+02 jv Exp $ ';
+my $RCS_Id = '$Id: skel2.pl,v 1.5 1997-12-25 16:22:50+01 jv Exp $ ';
 
 # Author          : Johan Vromans
 # Created On      : Sun Sep 15 18:39:01 1996
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Oct  1 13:38:13 1997
-# Update Count    : 11
+# Last Modified On: Thu Dec 25 16:22:48 1997
+# Update Count    : 12
 # Status          : Unknown, Use with caution!
 
 
@@ -46,7 +46,7 @@ sub options () {
     if ( @ARGV > 0 && $ARGV[0] =~ /^[-+]/ ) {
 	# The next require / import is equivalent to "use Getopt::Long".
 	require "Getopt/Long.pm";
-	import Getopt::Long 2.0;
+	import Getopt::Long 2.13;
 	GetOptions('ident'	=> \$ident,
 		   'verbose'	=> \$verbose,
 		   'trace'	=> \$trace,

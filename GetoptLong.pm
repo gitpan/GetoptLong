@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.12 1997-10-01 13:33:28+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.13 1997-12-25 16:20:17+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Oct  1 13:18:17 1997
-# Update Count    : 625
+# Last Modified On: Thu Dec 25 16:18:08 1997
+# Update Count    : 647
 # Status          : Released
 
 ################ Copyright ################
@@ -35,7 +35,7 @@ BEGIN {
     require 5.003;
     use Exporter ();
     use vars   qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION   = sprintf("%d.%02d", q$Revision: 2.12 $ =~ /(\d+)\.(\d+)/);
+    $VERSION   = sprintf("%d.%02d", q$Revision: 2.13 $ =~ /(\d+)\.(\d+)/);
 
     @ISA       = qw(Exporter);
     @EXPORT    = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
@@ -68,6 +68,7 @@ my $key;			# hash key for a hash option
 				# than once in differing environments
 my $config_defaults;		# set config defaults
 my $find_option;		# helper routine
+my $croak;			# helper routine
 
 ################ Subroutines ################
 
@@ -84,9 +85,9 @@ sub GetOptions {
     my %linkage;		# linkage
     my $userlinkage;		# user supplied HASH
     $genprefix = $gen_prefix;	# so we can call the same module many times
-    $error = 0;
+    $error = '';
 
-    print STDERR ('GetOptions $Revision: 2.12 $ ',
+    print STDERR ('GetOptions $Revision: 2.13 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",
@@ -114,9 +115,9 @@ sub GetOptions {
     # starter characters.
     if ( $optionlist[0] =~ /^\W+$/ ) {
 	$genprefix = shift (@optionlist);
-	# Turn into regexp.
+	# Turn into regexp. Needs to be parenthesized!
 	$genprefix =~ s/(\W)/\\$1/g;
-	$genprefix = "[" . $genprefix . "]";
+	$genprefix = "([" . $genprefix . "])";
     }
 
     # Verify correctness of optionlist.
@@ -126,7 +127,7 @@ sub GetOptions {
 	my $opt = shift (@optionlist);
 
 	# Strip leading prefix so people can specify "--foo=i" if they like.
-	$opt = $' if $opt =~ /^($genprefix)+/;
+	$opt = $2 if $opt =~ /^$genprefix+(.*)$/;
 
 	if ( $opt eq '<>' ) {
 	    if ( (defined $userlinkage)
@@ -137,8 +138,7 @@ sub GetOptions {
 	    }
 	    unless ( @optionlist > 0 
 		    && ref($optionlist[0]) && ref($optionlist[0]) eq 'CODE' ) {
-		warn ("Option spec <> requires a reference to a subroutine\n");
-		$error++;
+		$error .= "Option spec <> requires a reference to a subroutine\n";
 		next;
 	    }
 	    $linkage{'<>'} = shift (@optionlist);
@@ -147,8 +147,7 @@ sub GetOptions {
 
 	# Match option spec. Allow '?' as an alias.
 	if ( $opt !~ /^((\w+[-\w]*)(\|(\?|\w[-\w]*)?)*)?(!|[=:][infse][@%]?)?$/ ) {
-	    warn ("Error in option spec: \"", $opt, "\"\n");
-	    $error++;
+	    $error .= "Error in option spec: \"$opt\"\n";
 	    next;
 	}
 	my ($o, $c, $a) = ($1, $5);
@@ -228,18 +227,19 @@ sub GetOptions {
 		$opctl{$o} .= '@'
 		  if $opctl{$o} ne '' and $opctl{$o} !~ /\@$/;
 		$bopctl{$o} .= '@'
-		  if $bundling and $bopctl{$o} ne '' and $bopctl{$o} !~ /\@$/;
+		  if $bundling and defined $bopctl{$o} and 
+		    $bopctl{$o} ne '' and $bopctl{$o} !~ /\@$/;
 	    }
 	    elsif ( ref($optionlist[0]) =~ /^(HASH)$/ ) {
 		$linkage{$o} = shift (@optionlist);
 		$opctl{$o} .= '%'
 		  if $opctl{$o} ne '' and $opctl{$o} !~ /\%$/;
 		$bopctl{$o} .= '%'
-		  if $bundling and $bopctl{$o} ne '' and $bopctl{$o} !~ /\%$/;
+		  if $bundling and defined $bopctl{$o} and 
+		    $bopctl{$o} ne '' and $bopctl{$o} !~ /\%$/;
 	    }
 	    else {
-		warn ("Invalid option linkage for \"", $opt, "\"\n");
-		$error++;
+		$error .= "Invalid option linkage for \"$opt\"\n";
 	    }
 	}
 	else {
@@ -266,7 +266,8 @@ sub GetOptions {
     }
 
     # Bail out if errors found.
-    return 0 if $error;
+    die ($error) if $error;
+    $error = 0;
 
     # Sort the possible long option names.
     @opctl = sort(keys (%opctl)) if $autoabbrev;
@@ -343,7 +344,7 @@ sub GetOptions {
 		    else {
 			print STDERR ("Invalid REF type \"", ref($linkage{$opt}),
 				      "\" in linkage\n");
-			die ("Getopt::Long -- internal error!\n");
+			&$croak ("Getopt::Long -- internal error!\n");
 		    }
 		}
 		# No entry in linkage means entry in userlinkage.
@@ -383,7 +384,7 @@ sub GetOptions {
 	    # Try non-options call-back.
 	    my $cb;
 	    if ( (defined ($cb = $linkage{'<>'})) ) {
-		&$cb($tryopt);
+		&$cb ($tryopt);
 	    }
 	    else {
 		print STDERR ("=> saving \"$tryopt\" ",
@@ -419,9 +420,9 @@ sub config (@) {
     foreach $opt ( @options ) {
 	my $try = lc ($opt);
 	my $action = 1;
-	if ( $try =~ /^no_?/ ) {
+	if ( $try =~ /^no_?(.*)$/ ) {
 	    $action = 0;
-	    $try = $';
+	    $try = $1;
 	}
 	if ( $try eq 'default' or $try eq 'defaults' ) {
 	    &$config_defaults () if $action;
@@ -457,48 +458,39 @@ sub config (@) {
 	    $debug = $action;
 	}
 	else {
-	    $Carp::CarpLevel = 1;
-	    Carp::croak("Getopt::Long: unknown config parameter \"$opt\"")
+	    &$croak ("Getopt::Long: unknown config parameter \"$opt\"")
 	}
     }
 }
 
-# Modified from Exporter. This one handles 2.001 and 2.01 etc just like 2.1.
-sub require_version {
-    no strict;
-    my ($self, $wanted) = @_;
-    my $pkg = ref $self || $self;
-    my $version = $ {"${pkg}::VERSION"} || "(undef)";
-
-    $wanted .= '.0' unless $wanted =~ /\./;
-    $wanted = $1 * 1000 + $2 if $wanted =~ /^(\d+)\.(\d+)$/;
-    $version = $1 * 1000 + $2 if $version =~ /^(\d+)\.(\d+)$/;
-    if ( $version < $wanted ) {
-	$version =~ s/^(\d+)(\d\d\d)$/$1.'.'.(0+$2)/e;
-	$wanted =~ s/^(\d+)(\d\d\d)$/$1.'.'.(0+$2)/e;
-	$Carp::CarpLevel = 1;
-	Carp::croak("$pkg $wanted required--this is only version $version")
-    }
-    $version;
-}
+# To prevent Carp from being loaded unnecessarily.
+$croak = sub {
+    require 'Carp.pm';
+    $Carp::CarpLevel = 1;
+    Carp::croak(@_);
+};
 
 ################ Private Subroutines ################
 
 $find_option = sub {
 
-    return 0 unless $opt =~ /^$genprefix/;
+    print STDERR ("=> find \"$opt\", genprefix=\"$genprefix\"\n") if $debug;
 
-    $opt = $';
-    my ($starter) = $&;
+    return 0 unless $opt =~ /^$genprefix(.*)$/;
+
+    $opt = $2;
+    my ($starter) = $1;
+
+    print STDERR ("=> split \"$starter\"+\"$opt\"\n") if $debug;
 
     my $optarg = undef;	# value supplied with --opt=value
     my $rest = undef;	# remainder from unbundling
 
     # If it is a long option, it may include the value.
-    if (($starter eq "--" || $getopt_compat)
-	&& $opt =~ /^([^=]+)=/ ) {
+    if (($starter eq "--" || ($getopt_compat && !$bundling))
+	&& $opt =~ /^([^=]+)=(.*)$/ ) {
 	$opt = $1;
-	$optarg = $';
+	$optarg = $2;
 	print STDERR ("=> option \"", $opt, 
 		      "\", optarg = \"$optarg\"\n") if $debug;
     }
@@ -551,8 +543,8 @@ $find_option = sub {
 	    # Now see if it really is ambiguous.
 	    unless ( keys(%hit) == 1 ) {
 		return 0 if $passthrough;
-		print STDERR ("Option ", $opt, " is ambiguous (",
-			      join(", ", @hits), ")\n");
+		warn ("Option ", $opt, " is ambiguous (",
+		      join(", ", @hits), ")\n");
 		$error++;
 		undef $opt;
 		return 1;
@@ -592,7 +584,7 @@ $find_option = sub {
     if ( $type eq '' || $type eq '!' ) {
 	if ( defined $optarg ) {
 	    return 0 if $passthrough;
-	    print STDERR ("Option ", $opt, " does not take an argument\n");
+	    warn ("Option ", $opt, " does not take an argument\n");
 	    $error++;
 	    undef $opt;
 	}
@@ -617,7 +609,7 @@ $find_option = sub {
 	# Complain if this option needs an argument.
 	if ( $mand eq "=" ) {
 	    return 0 if $passthrough;
-	    print STDERR ("Option ", $opt, " requires an argument\n");
+	    warn ("Option ", $opt, " requires an argument\n");
 	    $error++;
 	    undef $opt;
 	}
@@ -634,7 +626,7 @@ $find_option = sub {
     # Get key if this is a "name=value" pair for a hash option.
     $key = undef;
     if ($hash && defined $arg) {
-	($key, $arg) = ($arg =~ /=/o) ? ($`, $') : ($arg, 1);
+	($key, $arg) = ($arg =~ /^(.*)=(.*)$/o) ? ($1, $2) : ($arg, 1);
     }
 
     #### Check if the argument is valid for this option ####
@@ -658,15 +650,20 @@ $find_option = sub {
     }
 
     elsif ( $type eq "n" || $type eq "i" ) { # numeric/integer
-	if ( $arg !~ /^-?[0-9]+$/ ) {
+	if ( $bundling && defined $rest && $rest =~ /^(-?[0-9]+)(.*)$/ ) {
+	    $arg = $1;
+	    $rest = $2;
+	    unshift (@ARGV, $starter.$rest) if defined $rest && $rest ne '';
+	}
+	elsif ( $arg !~ /^-?[0-9]+$/ ) {
 	    if ( defined $optarg || $mand eq "=" ) {
 		if ( $passthrough ) {
 		    unshift (@ARGV, defined $rest ? $starter.$rest : $arg)
 		      unless defined $optarg;
 		    return 0;
 		}
-		print STDERR ("Value \"", $arg, "\" invalid for option ",
-			      $opt, " (number expected)\n");
+		warn ("Value \"", $arg, "\" invalid for option ",
+		      $opt, " (number expected)\n");
 		$error++;
 		undef $opt;
 		# Push back.
@@ -682,15 +679,24 @@ $find_option = sub {
     }
 
     elsif ( $type eq "f" ) { # real number, int is also ok
-	if ( $arg !~ /^-?[0-9.]+([eE]-?[0-9]+)?$/ ) {
+	# We require at least one digit before a point or 'e',
+	# and at least one digit following the point and 'e'.
+	# [-]NN[.NN][eNN]
+	if ( $bundling && defined $rest &&
+	     $rest =~ /^(-?[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?)(.*)$/ ) {
+	    $arg = $1;
+	    $rest = $4;
+	    unshift (@ARGV, $starter.$rest) if defined $rest && $rest ne '';
+	}
+	elsif ( $arg !~ /^-?[0-9.]+(\.[0-9]+)?([eE]-?[0-9]+)?$/ ) {
 	    if ( defined $optarg || $mand eq "=" ) {
 		if ( $passthrough ) {
 		    unshift (@ARGV, defined $rest ? $starter.$rest : $arg)
 		      unless defined $optarg;
 		    return 0;
 		}
-		print STDERR ("Value \"", $arg, "\" invalid for option ",
-			      $opt, " (real number expected)\n");
+		warn ("Value \"", $arg, "\" invalid for option ",
+		      $opt, " (real number expected)\n");
 		$error++;
 		undef $opt;
 		# Push back.
@@ -705,7 +711,7 @@ $find_option = sub {
 	}
     }
     else {
-	die ("GetOpt::Long internal error (Can't happen)\n");
+	&$croak ("GetOpt::Long internal error (Can't happen)\n");
     }
     return 1;
 };
@@ -811,14 +817,14 @@ of GetOptions, @ARGV will contain the rest (i.e. the non-options) of
 the command line.
  
 Each option specifier designates the name of the option, optionally
-followed by an argument specifier. Values for argument specifiers are:
+followed by an argument specifier.
+
+Options that do not take arguments will have no argument specifier. 
+The option variable will be set to 1 if the option is used.
+
+For the other options, the values for argument specifiers are:
 
 =over 8
-
-=item E<lt>noneE<gt>
-
-Option does not take an argument. 
-The option variable will be set to 1.
 
 =item !
 
@@ -982,10 +988,20 @@ defined.
 Options that start with "--" may have an argument appended, separated
 with an "=", e.g. "--foo=bar".
 
-=head2 Return value
+=head2 Return values and Errors
 
-A return status of 0 (false) indicates that the function detected
-one or more errors.
+Configuration errors and errors in the option definitions are
+signalled using C<die()> and will terminate the calling
+program unless the call to C<Getopt::Long::GetOptions()> was embedded
+in C<eval { ... }> or C<die()> was trapped using C<$SIG{__DIE__}>.
+
+A return value of 1 (true) indicates success.
+
+A return status of 0 (false) indicates that the function detected one
+or more errors during option parsing. These errors are signalled using
+C<warn()> and can be trapped with C<$SIG{__WARN__}>.
+
+Errors that can't happen are signalled using C<Carp::croak()>.
 
 =head1 COMPATIBILITY
 
@@ -1166,10 +1182,11 @@ would be equivalent to
 provided "vax", "v", "a" and "x" have been defined to be valid
 options. 
 
-Bundled options can also include a value in the bundle; this value has
-to be the last part of the bundle, e.g.
+Bundled options can also include a value in the bundle; for strings
+this value is the rest of the bundle, but integer and floating values
+may be combined in the bundle, e.g.
 
-    scale -h24 -w80
+    scale -h24w80
 
 is equivalent to
 
@@ -1238,5 +1255,26 @@ Internal error flag. May be incremented from a call-back routine to
 cause options parsing to fail.
 
 =back
+
+=head1 AUTHOR
+
+Johan Vromans E<lt>jvromans@squirrel.nlE<gt>
+
+=head1 COPYRIGHT AND DISCLAIMER
+
+This program is Copyright 1990,1997 by Johan Vromans.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+If you do not have a copy of the GNU General Public License write to
+the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, 
+MA 02139, USA.
 
 =cut
